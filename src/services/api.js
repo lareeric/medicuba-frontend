@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:3000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
 });
 
 api.interceptors.request.use((config) => {
@@ -29,6 +29,6 @@ export const supprimerFavori   = (id)     => api.delete(`/favoris/${id}`);
 export const getPlanning       = ()       => api.get('/planning');
 export const genererPlanning   = (data)   => api.post('/planning/generer', data);
 export const marquerEffectue   = (id)     => api.patch(`/planning/${id}/effectue`);
-export const annulerEffectue = (id) => api.patch(`/planning/${id}/annuler`);
+export const annulerEffectue   = (id)     => api.patch(`/planning/${id}/annuler`);
 
 export default api;
