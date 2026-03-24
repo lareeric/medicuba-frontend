@@ -9,6 +9,7 @@ function Accueil() {
   const [cours, setCours]         = useState([]);
   const [loading, setLoading]     = useState(true);
   const navigate                  = useNavigate();
+  const isAdmin = utilisateur?.is_admin === true;
 
   useEffect(() => {
     const charger = async () => {
@@ -40,8 +41,18 @@ function Accueil() {
 
   const matieres = [...new Set(cours.map(c => c.matiere))];
 
+  const navItems = [
+    { label: 'Accueil',   icon: '🏠', path: '/' },
+    { label: 'Cours',     icon: '📚', path: '/cours' },
+    { label: 'Quiz',      icon: '🧠', path: '/quiz' },
+    { label: 'Glossaire', icon: '📖', path: '/glossaire' },
+    { label: 'Notes',     icon: '✏️', path: '/notes' },
+    { label: 'Planning',  icon: '📅', path: '/planning' },
+  ];
+
   if (loading) return (
     <div style={styles.loadingPage}>
+      <style>{`@keyframes spin { to{transform:rotate(360deg)} }`}</style>
       <div style={styles.loadingSpinner} />
       <p style={{ color: '#6b7280', marginTop: 12 }}>Chargement...</p>
     </div>
@@ -50,42 +61,131 @@ function Accueil() {
   return (
     <div style={styles.page}>
       <style>{`
-        @keyframes spin { to{transform:rotate(360deg)} }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes spin      { to{transform:rotate(360deg)} }
+        @keyframes fadeUp    { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
         @keyframes gradShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
-        .nav-item:hover { background: rgba(255,255,255,0.12) !important; color: #fff !important; }
-        .cours-card:hover { border-color: #534AB7 !important; transform: translateY(-2px) !important; box-shadow: 0 4px 20px rgba(83,74,183,0.1) !important; }
-        .cours-card { transition: all 0.2s ease !important; }
+        .nav-item:hover  { background: rgba(255,255,255,0.12) !important; color: #fff !important; }
+        .cours-card:hover{ border-color: #534AB7 !important; transform: translateY(-2px) !important; box-shadow: 0 4px 20px rgba(83,74,183,0.1) !important; }
+        .cours-card      { transition: all 0.2s ease !important; }
+        .quick-btn:hover { background: rgba(255,255,255,0.25) !important; }
+        .quick-btn       { transition: background 0.2s ease !important; }
+
+        /* ══════════════════════════════════
+           RESPONSIVE MOBILE
+        ══════════════════════════════════ */
+        @media (max-width: 768px) {
+
+          /* Sidebar cachée */
+          .sidebar-desktop { display: none !important; }
+
+          /* Main sans marge gauche */
+          .main-content { margin-left: 0 !important; }
+
+          /* Padding bas pour la navbar bottom */
+          .page-layout  { padding-bottom: 70px !important; }
+
+          /* Hero header compact */
+          .hero-header  { padding: 1.25rem 1rem !important; }
+          .hero-content { flex-direction: column !important; gap: 12px !important; align-items: flex-start !important; }
+          .hero-title   { font-size: 20px !important; }
+          .hero-date    { font-size: 12px !important; margin-bottom: 8px !important; }
+          .quick-actions{ flex-wrap: wrap !important; }
+          .quick-btn    { font-size: 12px !important; padding: 6px 12px !important; }
+
+          /* Content grid en colonne */
+          .content-grid { grid-template-columns: 1fr !important; padding: 1rem !important; gap: 1rem !important; }
+
+          /* Stats 3 colonnes → 3 colonnes mais plus compact */
+          .stats-grid   { gap: 6px !important; }
+          .stat-num     { font-size: 20px !important; }
+          .stat-label   { font-size: 10px !important; }
+          .stat-card    { padding: 0.75rem 0.5rem !important; }
+
+          /* Cards */
+          .card-pad     { padding: 1rem !important; border-radius: 12px !important; }
+
+          /* Navbar bottom visible */
+          .bottom-nav   { display: flex !important; }
+        }
+
+        /* Bottom nav cachée par défaut (desktop) */
+        .bottom-nav {
+          display: none;
+          position: fixed;
+          bottom: 0; left: 0; right: 0;
+          background: linear-gradient(180deg,#1a1a2e,#2d1b69);
+          height: 64px;
+          z-index: 200;
+          align-items: center;
+          justify-content: space-around;
+          padding: 0 4px;
+          border-top: 0.5px solid rgba(255,255,255,0.1);
+        }
+        .bottom-nav-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 2px;
+          padding: 6px 10px;
+          border-radius: 10px;
+          cursor: pointer;
+          flex: 1;
+          transition: background 0.15s ease;
+        }
+        .bottom-nav-item:hover { background: rgba(255,255,255,0.1); }
+        .bottom-nav-item.actif { background: rgba(255,255,255,0.12); }
+        .bottom-nav-icon  { font-size: 18px; line-height: 1; }
+        .bottom-nav-label { font-size: 9px; color: rgba(255,255,255,0.6); font-weight: 500; }
+        .bottom-nav-item.actif .bottom-nav-label { color: #fff; }
+
+        /* Header mobile */
+        .mobile-header {
+          display: none;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 1rem;
+          height: 56px;
+          background: linear-gradient(180deg,#1a1a2e,#2d1b69);
+          position: sticky;
+          top: 0;
+          z-index: 100;
+        }
+        @media (max-width: 768px) {
+          .mobile-header { display: flex !important; }
+        }
       `}</style>
 
-      <div style={styles.layout}>
+      {/* ── Header mobile (visible uniquement sur mobile) ── */}
+      <div className="mobile-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={styles.logoIcon}>M</div>
+          <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>MediCuba ES</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={styles.userAvatar}>{utilisateur?.prenom?.[0]}</div>
+          <button style={{ ...styles.logoutBtn, padding: '5px 10px', fontSize: 11 }} onClick={handleLogout}>
+            Quitter
+          </button>
+        </div>
+      </div>
 
-        {/* Sidebar */}
-        <aside style={styles.sidebar}>
+      <div className="page-layout" style={styles.layout}>
+
+        {/* ── Sidebar desktop ── */}
+        <aside className="sidebar-desktop" style={styles.sidebar}>
           <div style={styles.sidebarTop}>
             <div style={styles.logo}>
               <div style={styles.logoIcon}>M</div>
               <span style={styles.logoText}>MediCuba ES</span>
             </div>
             <nav style={styles.nav}>
-              {['Accueil', 'Cours', 'Quiz', 'Glossaire', 'Notes', 'Planning'].map(item => (
-                <div
-                  key={item}
-                  className="nav-item"
-                  style={{
-                    ...styles.navItem,
-                    ...(item === 'Accueil' ? styles.navItemActif : {})
-                  }}
-                  onClick={() => handleNav(item)}
-                >
-                  <span style={styles.navIcon}>
-                    {item === 'Accueil'   ? '🏠' :
-                     item === 'Cours'     ? '📚' :
-                     item === 'Quiz'      ? '🧠' :
-                     item === 'Glossaire' ? '📖' :
-                     item === 'Notes'     ? '✏️' : '📅'}
-                  </span>
-                  {item}
+              {navItems.map(item => (
+                <div key={item.label} className="nav-item"
+                  style={{ ...styles.navItem, ...(item.label === 'Accueil' ? styles.navItemActif : {}) }}
+                  onClick={() => item.label === 'Accueil' ? null : handleNav(item.label)}>
+                  <span style={styles.navIcon}>{item.icon}</span>
+                  {item.label}
                 </div>
               ))}
             </nav>
@@ -99,21 +199,23 @@ function Accueil() {
               </div>
             </div>
             <button style={styles.logoutBtn} onClick={handleLogout}>Déconnexion</button>
+            {isAdmin && (
+              <button style={{ ...styles.logoutBtn, background: 'rgba(249,115,22,0.15)', color: '#F97316', marginTop: 6, border: '0.5px solid rgba(249,115,22,0.3)' }}
+                onClick={() => navigate('/admin')}>Panel Admin</button>
+            )}
           </div>
         </aside>
 
-        {/* Main */}
-        <main style={styles.main}>
+        {/* ── Main ── */}
+        <main className="main-content" style={styles.main}>
 
           {/* Hero header */}
-          <div style={styles.heroHeader}>
+          <div className="hero-header" style={styles.heroHeader}>
             <div style={styles.heroBg} />
-            <div style={styles.heroContent}>
-              <div style={styles.heroLeft}>
-                <h1 style={styles.heroTitle}>
-                  Bonjour {utilisateur?.prenom} 👋
-                </h1>
-                <p style={styles.heroDate}>
+            <div className="hero-content" style={styles.heroContent}>
+              <div>
+                <h1 className="hero-title" style={styles.heroTitle}>Bonjour {utilisateur?.prenom} 👋</h1>
+                <p className="hero-date" style={styles.heroDate}>
                   {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                 </p>
                 <div style={styles.heroBadges}>
@@ -121,84 +223,75 @@ function Accueil() {
                   <span style={styles.heroBadge}>{matieres.length} matières</span>
                 </div>
               </div>
-              <div style={styles.heroRight}>
-                <div style={styles.quickActions}>
-                  <button style={styles.quickBtn} onClick={() => navigate('/cours')}>📚 Voir les cours</button>
-                  <button style={styles.quickBtn} onClick={() => navigate('/planning')}>📅 Mon planning</button>
-                </div>
+              <div className="quick-actions" style={styles.quickActions}>
+                <button className="quick-btn" style={styles.quickBtn} onClick={() => navigate('/cours')}>📚 Voir les cours</button>
+                <button className="quick-btn" style={styles.quickBtn} onClick={() => navigate('/planning')}>📅 Mon planning</button>
               </div>
             </div>
           </div>
 
-          <div style={styles.contentGrid}>
+          {/* Contenu */}
+          <div className="content-grid" style={styles.contentGrid}>
 
             {/* Colonne gauche */}
             <div style={styles.colLeft}>
 
-              {/* Verset du jour */}
+              {/* Verset */}
               {verset && (
-                <div style={{ ...styles.card, ...styles.versetCard, animation: 'fadeUp 0.5s ease forwards' }}>
+                <div className="card-pad" style={{ ...styles.card, ...styles.versetCard, animation: 'fadeUp 0.5s ease forwards' }}>
                   <div style={styles.versetHeader}>
                     <span style={styles.versetIcon}>✝️</span>
                     <span style={styles.versetLabel}>Verset du jour</span>
                   </div>
                   <p style={styles.versetTexte}>"{verset.texte_fr}"</p>
                   <p style={styles.versetRef}>{verset.reference}</p>
-                  {verset.texte_es && (
-                    <p style={styles.versetEs}>"{verset.texte_es}"</p>
-                  )}
+                  {verset.texte_es && <p style={styles.versetEs}>"{verset.texte_es}"</p>}
                 </div>
               )}
 
               {/* Stats */}
-              <div style={styles.statsGrid}>
+              <div className="stats-grid" style={styles.statsGrid}>
                 {[
-                  { n: cours.length, l: 'Cours disponibles', c: '#534AB7', bg: '#EEEDFE' },
-                  { n: matieres.length, l: 'Matières', c: '#1D9E75', bg: '#E1F5EE' },
-                  { n: '0', l: 'Cours terminés', c: '#F97316', bg: '#FFF3E0' },
+                  { n: cours.length,    l: 'Cours disponibles', c: '#534AB7' },
+                  { n: matieres.length, l: 'Matières',          c: '#1D9E75' },
+                  { n: '0',             l: 'Cours terminés',    c: '#F97316' },
                 ].map(s => (
-                  <div key={s.l} style={{ ...styles.statCard, borderTop: `3px solid ${s.c}` }}>
-                    <div style={{ ...styles.statNum, color: s.c }}>{s.n}</div>
-                    <div style={styles.statLabel}>{s.l}</div>
+                  <div key={s.l} className="stat-card" style={{ ...styles.statCard, borderTop: `3px solid ${s.c}` }}>
+                    <div className="stat-num" style={{ ...styles.statNum, color: s.c }}>{s.n}</div>
+                    <div className="stat-label" style={styles.statLabel}>{s.l}</div>
                   </div>
                 ))}
               </div>
 
               {/* Matières */}
-              <div style={{ ...styles.card, animation: 'fadeUp 0.6s ease 0.1s forwards', opacity: 0 }}>
+              <div className="card-pad" style={{ ...styles.card, animation: 'fadeUp 0.6s ease 0.1s forwards', opacity: 0 }}>
                 <div style={styles.cardHeader}>
                   <h3 style={styles.cardTitle}>Matières de {utilisateur?.annee_etudes}e année</h3>
                 </div>
                 <div style={styles.matiereGrid}>
                   {matieres.map((m, i) => (
-                    <div
-                      key={m}
+                    <div key={m}
                       style={{ ...styles.matierePill, borderLeft: `3px solid ${i % 2 === 0 ? '#534AB7' : '#F97316'}` }}
-                      onClick={() => navigate('/cours')}
-                    >
+                      onClick={() => navigate('/cours')}>
                       {m}
                     </div>
                   ))}
                 </div>
               </div>
-
             </div>
 
-            {/* Colonne droite — cours récents */}
+            {/* Colonne droite */}
             <div style={styles.colRight}>
-              <div style={{ ...styles.card, animation: 'fadeUp 0.5s ease 0.15s forwards', opacity: 0 }}>
+              <div className="card-pad" style={{ ...styles.card, animation: 'fadeUp 0.5s ease 0.15s forwards', opacity: 0 }}>
                 <div style={styles.cardHeader}>
                   <h3 style={styles.cardTitle}>Cours de {utilisateur?.annee_etudes}e année</h3>
                   <button style={styles.voirTout} onClick={() => navigate('/cours')}>Voir tout →</button>
                 </div>
                 <div style={styles.coursList}>
                   {cours.slice(0, 6).map((c, i) => (
-                    <div
-                      key={c.id}
-                      className="cours-card"
+                    <div key={c.id} className="cours-card"
                       style={{ ...styles.coursCard, animationDelay: `${i * 0.05}s` }}
-                      onClick={() => navigate(`/cours/${c.id}`)}
-                    >
+                      onClick={() => navigate(`/cours/${c.id}`)}>
                       <div style={styles.coursCardLeft}>
                         <div style={styles.coursNum}>{i + 1}</div>
                         <div>
@@ -220,9 +313,20 @@ function Accueil() {
                 )}
               </div>
             </div>
-
           </div>
         </main>
+      </div>
+
+      {/* ── Barre de navigation bottom (mobile uniquement) ── */}
+      <div className="bottom-nav">
+        {navItems.map(item => (
+          <div key={item.label}
+            className={`bottom-nav-item ${item.label === 'Accueil' ? 'actif' : ''}`}
+            onClick={() => item.label === 'Accueil' ? null : navigate(item.path)}>
+            <span className="bottom-nav-icon">{item.icon}</span>
+            <span className="bottom-nav-label">{item.label}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -244,21 +348,19 @@ const styles = {
   navItemActif:    { background: 'rgba(255,255,255,0.12)', color: '#fff' },
   sidebarBottom:   { borderTop: '0.5px solid rgba(255,255,255,0.1)', paddingTop: '1rem' },
   userCard:        { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 },
-  userAvatar:      { width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#534AB7,#F97316)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 15 },
+  userAvatar:      { width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#534AB7,#F97316)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 15, flexShrink: 0 },
   userName:        { fontSize: 13, fontWeight: 600, color: '#fff' },
   userAnnee:       { fontSize: 11, color: 'rgba(255,255,255,0.5)' },
   logoutBtn:       { width: '100%', padding: '8px', background: 'rgba(255,255,255,0.08)', border: '0.5px solid rgba(255,255,255,0.15)', borderRadius: 8, color: 'rgba(255,255,255,0.6)', fontSize: 12, cursor: 'pointer', fontWeight: 500 },
   main:            { flex: 1, overflow: 'auto' },
-  heroHeader:      { position: 'relative', overflow: 'hidden', padding: '2.5rem 2rem 2rem', marginBottom: '0' },
+  heroHeader:      { position: 'relative', overflow: 'hidden', padding: '2.5rem 2rem 2rem' },
   heroBg:          { position: 'absolute', inset: 0, background: 'linear-gradient(135deg,#534AB7,#7C3AED,#F97316)', backgroundSize: '200% 200%', animation: 'gradShift 8s ease infinite', opacity: 0.92 },
-  heroContent:     { position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  heroLeft:        { },
+  heroContent:     { position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 },
   heroTitle:       { fontSize: 28, fontWeight: 800, color: '#fff', margin: '0 0 4px' },
   heroDate:        { fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: '0 0 12px', textTransform: 'capitalize' },
-  heroBadges:      { display: 'flex', gap: 8 },
+  heroBadges:      { display: 'flex', gap: 8, flexWrap: 'wrap' },
   heroBadge:       { fontSize: 12, background: 'rgba(255,255,255,0.2)', color: '#fff', borderRadius: 20, padding: '4px 12px', fontWeight: 500, border: '1px solid rgba(255,255,255,0.25)' },
-  heroRight:       { },
-  quickActions:    { display: 'flex', gap: 8 },
+  quickActions:    { display: 'flex', gap: 8, flexWrap: 'wrap' },
   quickBtn:        { padding: '8px 16px', background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: 10, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', backdropFilter: 'blur(4px)' },
   contentGrid:     { display: 'grid', gridTemplateColumns: '1fr 1.6fr', gap: '1.5rem', padding: '1.5rem 2rem 2rem' },
   colLeft:         { display: 'flex', flexDirection: 'column', gap: '1rem' },
@@ -286,7 +388,7 @@ const styles = {
   coursNum:        { width: 28, height: 28, borderRadius: '50%', background: '#EEEDFE', color: '#534AB7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, flexShrink: 0 },
   coursTitre:      { fontSize: 13, fontWeight: 600, color: '#1a1a2e', marginBottom: 2 },
   coursMeta:       { fontSize: 11, color: '#9ca3af' },
-  coursCardRight:  { display: 'flex', alignItems: 'center', gap: 8 },
+  coursCardRight:  { display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 },
   coursBadge:      { fontSize: 11, background: '#EEEDFE', color: '#3C3489', borderRadius: 20, padding: '2px 10px', fontWeight: 500 },
   coursArrow:      { fontSize: 18, color: '#d1d5db', fontWeight: 300 },
   voirPlusBtnFull: { width: '100%', marginTop: '1rem', padding: '10px', background: 'transparent', border: '1px dashed #d1d5db', borderRadius: 10, fontSize: 13, color: '#6b7280', cursor: 'pointer', fontWeight: 500 },

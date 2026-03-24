@@ -13,6 +13,7 @@ function Notes() {
   const [coursId, setCoursId]     = useState('');
   const [loading, setLoading]     = useState(true);
   const navigate                  = useNavigate();
+  const isAdmin = utilisateur?.is_admin === true;
 
   useEffect(() => { charger(); }, []);
 
@@ -64,6 +65,15 @@ function Notes() {
     if (item === 'Planning')  navigate('/planning');
   };
 
+  const navItems = [
+    { label: 'Accueil',   icon: '🏠', path: '/' },
+    { label: 'Cours',     icon: '📚', path: '/cours' },
+    { label: 'Quiz',      icon: '🧠', path: '/quiz' },
+    { label: 'Glossaire', icon: '📖', path: '/glossaire' },
+    { label: 'Notes',     icon: '✏️', path: '/notes' },
+    { label: 'Planning',  icon: '📅', path: '/planning' },
+  ];
+
   return (
     <div style={styles.page}>
       <style>{`
@@ -74,25 +84,85 @@ function Notes() {
         .note-card:hover { border-color: #534AB7 !important; }
         .note-card { transition: all 0.18s ease !important; }
         .del-btn:hover { background: #FEF2F2 !important; color: #DC2626 !important; }
+
+        /* ══════════════════════════════════
+           RESPONSIVE MOBILE
+        ══════════════════════════════════ */
+        @media (max-width: 768px) {
+          .sidebar-desktop { display: none !important; }
+          .main-content    { margin-left: 0 !important; }
+          .page-layout     { padding-bottom: 70px !important; }
+
+          .hero-header  { padding: 1.25rem 1rem !important; }
+          .hero-title   { font-size: 20px !important; }
+
+          .content-pad  { padding: 1rem !important; }
+
+          .note-header  { flex-direction: column !important; align-items: flex-start !important; gap: 8px !important; }
+          .fav-actions  { flex-wrap: wrap !important; }
+
+          .bottom-nav   { display: flex !important; }
+        }
+
+        .bottom-nav {
+          display: none;
+          position: fixed;
+          bottom: 0; left: 0; right: 0;
+          background: linear-gradient(180deg,#1a1a2e,#2d1b69);
+          height: 64px; z-index: 200;
+          align-items: center; justify-content: space-around;
+          padding: 0 4px;
+          border-top: 0.5px solid rgba(255,255,255,0.1);
+        }
+        .bottom-nav-item {
+          display: flex; flex-direction: column; align-items: center;
+          justify-content: center; gap: 2px; padding: 6px 10px;
+          border-radius: 10px; cursor: pointer; flex: 1;
+          transition: background 0.15s ease;
+        }
+        .bottom-nav-item:hover { background: rgba(255,255,255,0.1); }
+        .bottom-nav-item.actif { background: rgba(255,255,255,0.12); }
+        .bottom-nav-icon  { font-size: 18px; line-height: 1; }
+        .bottom-nav-label { font-size: 9px; color: rgba(255,255,255,0.6); font-weight: 500; }
+        .bottom-nav-item.actif .bottom-nav-label { color: #fff; }
+
+        .mobile-header {
+          display: none;
+          align-items: center; justify-content: space-between;
+          padding: 0 1rem; height: 56px;
+          background: linear-gradient(180deg,#1a1a2e,#2d1b69);
+          position: sticky; top: 0; z-index: 100;
+        }
+        @media (max-width: 768px) {
+          .mobile-header { display: flex !important; }
+        }
       `}</style>
 
-      <div style={styles.layout}>
-        {/* Sidebar */}
-        <aside style={styles.sidebar}>
+      {/* ── Header mobile ── */}
+      <div className="mobile-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={styles.logoIcon}>M</div>
+          <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>MediCuba ES</span>
+        </div>
+        <div style={styles.userAvatar}>{utilisateur?.prenom?.[0]}</div>
+      </div>
+
+      <div className="page-layout" style={styles.layout}>
+
+        {/* ── Sidebar desktop ── */}
+        <aside className="sidebar-desktop" style={styles.sidebar}>
           <div style={styles.sidebarTop}>
             <div style={styles.logo}>
               <div style={styles.logoIcon}>M</div>
               <span style={styles.logoText}>MediCuba ES</span>
             </div>
             <nav style={styles.nav}>
-              {['Accueil', 'Cours', 'Quiz', 'Glossaire', 'Notes', 'Planning'].map(item => (
-                <div key={item} className="nav-item"
-                  style={{ ...styles.navItem, ...(item === 'Notes' ? styles.navItemActif : {}) }}
-                  onClick={() => handleNav(item)}>
-                  <span style={styles.navIcon}>
-                    {item === 'Accueil' ? '🏠' : item === 'Cours' ? '📚' : item === 'Quiz' ? '🧠' : item === 'Glossaire' ? '📖' : item === 'Notes' ? '✏️' : '📅'}
-                  </span>
-                  {item}
+              {navItems.map(item => (
+                <div key={item.label} className="nav-item"
+                  style={{ ...styles.navItem, ...(item.label === 'Notes' ? styles.navItemActif : {}) }}
+                  onClick={() => item.label === 'Notes' ? null : handleNav(item.label)}>
+                  <span style={styles.navIcon}>{item.icon}</span>
+                  {item.label}
                 </div>
               ))}
             </nav>
@@ -105,22 +175,29 @@ function Notes() {
                 <div style={styles.userAnnee}>{utilisateur?.annee_etudes}e année</div>
               </div>
             </div>
+            {isAdmin && (
+              <button style={{ ...styles.logoutBtn, background: 'rgba(249,115,22,0.15)', color: '#F97316', marginTop: 6, border: '0.5px solid rgba(249,115,22,0.3)' }}
+                onClick={() => navigate('/admin')}>Panel Admin</button>
+            )}
           </div>
         </aside>
 
-        <main style={styles.main}>
+        {/* ── Main ── */}
+        <main className="main-content" style={styles.main}>
+
           {/* Hero */}
-          <div style={styles.heroHeader}>
+          <div className="hero-header" style={styles.heroHeader}>
             <div style={styles.heroBg} />
             <div style={styles.heroContent}>
               <div>
-                <h1 style={styles.heroTitle}>✏️ Notes & Favoris</h1>
+                <h1 className="hero-title" style={styles.heroTitle}>✏️ Notes & Favoris</h1>
                 <p style={styles.heroSub}>{notes.length} note(s) · {favoris.length} favori(s)</p>
               </div>
             </div>
           </div>
 
-          <div style={styles.content}>
+          <div className="content-pad" style={styles.content}>
+
             {/* Onglets */}
             <div style={styles.onglets}>
               <div style={{ ...styles.onglet, ...(onglet === 'notes' ? styles.ongletActif : {}) }}
@@ -159,7 +236,6 @@ function Notes() {
                   </form>
                 </div>
 
-                {/* Liste notes */}
                 {notes.length === 0 ? (
                   <div style={styles.emptyState}>
                     <div style={styles.emptyIcon}>✏️</div>
@@ -171,7 +247,7 @@ function Notes() {
                     {notes.map((n, i) => (
                       <div key={n.id} className="note-card"
                         style={{ ...styles.noteCard, animationDelay: `${i * 0.05}s` }}>
-                        <div style={styles.noteHeader}>
+                        <div className="note-header" style={styles.noteHeader}>
                           <div>
                             <div style={styles.noteTitre}>{n.titre_es}</div>
                             <div style={styles.noteMeta}>
@@ -208,7 +284,7 @@ function Notes() {
                     {favoris.map((f, i) => (
                       <div key={f.id} className="note-card"
                         style={{ ...styles.noteCard, animationDelay: `${i * 0.05}s` }}>
-                        <div style={styles.noteHeader}>
+                        <div className="note-header" style={styles.noteHeader}>
                           <div>
                             <div style={styles.noteTitre}>{f.titre_es}</div>
                             <div style={styles.noteMeta}>
@@ -216,7 +292,7 @@ function Notes() {
                               <span style={styles.noteDate}>{f.annee}e année · {f.duree_minutes} min</span>
                             </div>
                           </div>
-                          <div style={styles.favActions}>
+                          <div className="fav-actions" style={styles.favActions}>
                             <button style={styles.quizBtn}
                               onClick={() => navigate(`/quiz?cours_id=${f.cours_id}`)}>
                               Quiz
@@ -241,6 +317,18 @@ function Notes() {
           </div>
         </main>
       </div>
+
+      {/* ── Bottom nav mobile ── */}
+      <div className="bottom-nav">
+        {navItems.map(item => (
+          <div key={item.label}
+            className={`bottom-nav-item ${item.label === 'Notes' ? 'actif' : ''}`}
+            onClick={() => item.label === 'Notes' ? null : navigate(item.path)}>
+            <span className="bottom-nav-icon">{item.icon}</span>
+            <span className="bottom-nav-label">{item.label}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -258,10 +346,11 @@ const styles = {
   navIcon:       { fontSize: 16 },
   navItemActif:  { background: 'rgba(255,255,255,0.12)', color: '#fff' },
   sidebarBottom: { borderTop: '0.5px solid rgba(255,255,255,0.1)', paddingTop: '1rem' },
-  userCard:      { display: 'flex', alignItems: 'center', gap: 10 },
-  userAvatar:    { width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#534AB7,#F97316)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 15 },
+  userCard:      { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 },
+  userAvatar:    { width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#534AB7,#F97316)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 15, flexShrink: 0 },
   userName:      { fontSize: 13, fontWeight: 600, color: '#fff' },
   userAnnee:     { fontSize: 11, color: 'rgba(255,255,255,0.5)' },
+  logoutBtn:     { width: '100%', padding: '8px', background: 'rgba(255,255,255,0.08)', border: '0.5px solid rgba(255,255,255,0.15)', borderRadius: 8, color: 'rgba(255,255,255,0.6)', fontSize: 12, cursor: 'pointer', fontWeight: 500 },
   main:          { flex: 1, overflow: 'auto' },
   heroHeader:    { position: 'relative', overflow: 'hidden', padding: '2rem' },
   heroBg:        { position: 'absolute', inset: 0, background: 'linear-gradient(135deg,#F97316,#EA580C,#534AB7)', backgroundSize: '200% 200%', animation: 'gradShift 8s ease infinite', opacity: 0.92 },
@@ -279,7 +368,7 @@ const styles = {
   form:          { display: 'flex', flexDirection: 'column', gap: 10 },
   select:        { padding: '10px 14px', borderRadius: 10, border: '1.5px solid #e5e7eb', fontSize: 13, color: '#374151', background: '#fafafa' },
   textarea:      { padding: '10px 14px', borderRadius: 10, border: '1.5px solid #e5e7eb', fontSize: 13, fontFamily: 'system-ui', resize: 'vertical', color: '#1a1a2e', background: '#fafafa' },
-  btnSubmit:     { padding: '10px', background: 'linear-gradient(135deg,#534AB7,#7C3AED)', border: 'none', borderRadius: 10, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', alignSelf: 'flex-start', paddingLeft: 20, paddingRight: 20 },
+  btnSubmit:     { padding: '10px 20px', background: 'linear-gradient(135deg,#534AB7,#7C3AED)', border: 'none', borderRadius: 10, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', alignSelf: 'flex-start' },
   emptyState:    { textAlign: 'center', padding: '3rem', background: '#fff', borderRadius: 16, border: '0.5px solid #e5e7eb' },
   emptyIcon:     { fontSize: 40, marginBottom: 12 },
   emptyTitle:    { fontSize: 16, fontWeight: 700, color: '#1a1a2e', margin: '0 0 6px' },

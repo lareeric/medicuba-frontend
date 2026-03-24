@@ -9,6 +9,7 @@ function Cours() {
   const [filtre, setFiltre]     = useState({ annee: '', matiere: '' });
   const [loading, setLoading]   = useState(true);
   const navigate                = useNavigate();
+  const isAdmin = utilisateur?.is_admin === true;
 
   useEffect(() => { charger(); }, [filtre]);
 
@@ -54,6 +55,15 @@ function Cours() {
     'Chirurgie':     '#059669',
   };
 
+  const navItems = [
+    { label: 'Accueil',   icon: '🏠', path: '/' },
+    { label: 'Cours',     icon: '📚', path: '/cours' },
+    { label: 'Quiz',      icon: '🧠', path: '/quiz' },
+    { label: 'Glossaire', icon: '📖', path: '/glossaire' },
+    { label: 'Notes',     icon: '✏️', path: '/notes' },
+    { label: 'Planning',  icon: '📅', path: '/planning' },
+  ];
+
   return (
     <div style={styles.page}>
       <style>{`
@@ -64,26 +74,97 @@ function Cours() {
         .cours-card:hover { border-color: #534AB7 !important; transform: translateY(-2px) !important; box-shadow: 0 4px 20px rgba(83,74,183,0.1) !important; }
         .cours-card { transition: all 0.2s ease !important; }
         .fav-btn:hover { background: #EEEDFE !important; color: #534AB7 !important; }
+
+        /* ══════════════════════════════════
+           RESPONSIVE MOBILE
+        ══════════════════════════════════ */
+        @media (max-width: 768px) {
+          .sidebar-desktop { display: none !important; }
+          .main-content    { margin-left: 0 !important; }
+          .page-layout     { padding-bottom: 70px !important; }
+
+          .hero-header  { padding: 1.25rem 1rem !important; }
+          .hero-title   { font-size: 20px !important; }
+          .hero-sub     { font-size: 12px !important; }
+
+          .content-pad  { padding: 1rem !important; }
+
+          .filtres-bar  { flex-direction: column !important; gap: 8px !important; align-items: stretch !important; }
+          .filtres-left { flex-wrap: wrap !important; }
+          .select-box   { flex: 1 !important; min-width: 0 !important; }
+
+          .matieres-pills { gap: 6px !important; }
+          .matiere-pill   { padding: 5px 12px !important; font-size: 11px !important; }
+
+          .cours-card   { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; padding: 12px !important; }
+          .cours-right  { width: 100% !important; justify-content: flex-end !important; }
+          .cours-meta   { flex-wrap: wrap !important; }
+
+          .bottom-nav   { display: flex !important; }
+        }
+
+        /* Bottom nav cachée par défaut (desktop) */
+        .bottom-nav {
+          display: none;
+          position: fixed;
+          bottom: 0; left: 0; right: 0;
+          background: linear-gradient(180deg,#1a1a2e,#2d1b69);
+          height: 64px;
+          z-index: 200;
+          align-items: center;
+          justify-content: space-around;
+          padding: 0 4px;
+          border-top: 0.5px solid rgba(255,255,255,0.1);
+        }
+        .bottom-nav-item {
+          display: flex; flex-direction: column; align-items: center;
+          justify-content: center; gap: 2px; padding: 6px 10px;
+          border-radius: 10px; cursor: pointer; flex: 1;
+          transition: background 0.15s ease;
+        }
+        .bottom-nav-item:hover { background: rgba(255,255,255,0.1); }
+        .bottom-nav-item.actif { background: rgba(255,255,255,0.12); }
+        .bottom-nav-icon  { font-size: 18px; line-height: 1; }
+        .bottom-nav-label { font-size: 9px; color: rgba(255,255,255,0.6); font-weight: 500; }
+        .bottom-nav-item.actif .bottom-nav-label { color: #fff; }
+
+        .mobile-header {
+          display: none;
+          align-items: center; justify-content: space-between;
+          padding: 0 1rem; height: 56px;
+          background: linear-gradient(180deg,#1a1a2e,#2d1b69);
+          position: sticky; top: 0; z-index: 100;
+        }
+        @media (max-width: 768px) {
+          .mobile-header { display: flex !important; }
+        }
       `}</style>
 
-      <div style={styles.layout}>
-        {/* Sidebar */}
-        <aside style={styles.sidebar}>
+      {/* ── Header mobile ── */}
+      <div className="mobile-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={styles.logoIcon}>M</div>
+          <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>MediCuba ES</span>
+        </div>
+        <div style={styles.userAvatar}>{utilisateur?.prenom?.[0]}</div>
+      </div>
+
+      <div className="page-layout" style={styles.layout}>
+
+        {/* ── Sidebar desktop ── */}
+        <aside className="sidebar-desktop" style={styles.sidebar}>
           <div style={styles.sidebarTop}>
             <div style={styles.logo}>
               <div style={styles.logoIcon}>M</div>
               <span style={styles.logoText}>MediCuba ES</span>
             </div>
             <nav style={styles.nav}>
-              {['Accueil', 'Cours', 'Quiz', 'Glossaire', 'Notes', 'Planning'].map(item => (
-                <div key={item} className="nav-item"
-                  style={{ ...styles.navItem, ...(item === 'Cours' ? styles.navItemActif : {}) }}
-                  onClick={() => handleNav(item)}
-                >
-                  <span style={styles.navIcon}>
-                    {item === 'Accueil' ? '🏠' : item === 'Cours' ? '📚' : item === 'Quiz' ? '🧠' : item === 'Glossaire' ? '📖' : item === 'Notes' ? '✏️' : '📅'}
-                  </span>
-                  {item}
+              {navItems.map(item => (
+                <div key={item.label} className="nav-item"
+                  style={{ ...styles.navItem, ...(item.label === 'Cours' ? styles.navItemActif : {}) }}
+                  onClick={() => item.label === 'Cours' ? null : handleNav(item.label)}>
+                  <span style={styles.navIcon}>{item.icon}</span>
+                  {item.label}
                 </div>
               ))}
             </nav>
@@ -96,31 +177,38 @@ function Cours() {
                 <div style={styles.userAnnee}>{utilisateur?.annee_etudes}e année</div>
               </div>
             </div>
+            {isAdmin && (
+              <button style={{ ...styles.logoutBtn, background: 'rgba(249,115,22,0.15)', color: '#F97316', marginTop: 6, border: '0.5px solid rgba(249,115,22,0.3)' }}
+                onClick={() => navigate('/admin')}>Panel Admin</button>
+            )}
           </div>
         </aside>
 
-        <main style={styles.main}>
+        {/* ── Main ── */}
+        <main className="main-content" style={styles.main}>
+
           {/* Hero */}
-          <div style={styles.heroHeader}>
+          <div className="hero-header" style={styles.heroHeader}>
             <div style={styles.heroBg} />
             <div style={styles.heroContent}>
               <div>
-                <h1 style={styles.heroTitle}>📚 Tous les cours</h1>
-                <p style={styles.heroSub}>Programme officiel MINSAP · {cours.length} cours disponibles</p>
+                <h1 className="hero-title" style={styles.heroTitle}>📚 Tous les cours</h1>
+                <p className="hero-sub" style={styles.heroSub}>Programme officiel MINSAP · {cours.length} cours disponibles</p>
               </div>
             </div>
           </div>
 
-          <div style={styles.content}>
+          <div className="content-pad" style={styles.content}>
+
             {/* Filtres */}
-            <div style={styles.filtresBar}>
-              <div style={styles.filtresLeft}>
-                <select style={styles.select} value={filtre.annee}
+            <div className="filtres-bar" style={styles.filtresBar}>
+              <div className="filtres-left" style={styles.filtresLeft}>
+                <select className="select-box" style={styles.select} value={filtre.annee}
                   onChange={e => setFiltre({ ...filtre, annee: e.target.value })}>
                   <option value="">Toutes les années</option>
                   {[1,2,3,4,5,6].map(a => <option key={a} value={a}>{a}e année</option>)}
                 </select>
-                <select style={styles.select} value={filtre.matiere}
+                <select className="select-box" style={styles.select} value={filtre.matiere}
                   onChange={e => setFiltre({ ...filtre, matiere: e.target.value })}>
                   <option value="">Toutes les matières</option>
                   {matieres.map(m => <option key={m} value={m}>{m}</option>)}
@@ -130,13 +218,13 @@ function Cours() {
             </div>
 
             {/* Matières pills */}
-            <div style={styles.matieresPills}>
-              <div style={{ ...styles.matierePill, background: !filtre.matiere ? '#534AB7' : '#f3f4f6', color: !filtre.matiere ? '#fff' : '#374151' }}
+            <div className="matieres-pills" style={styles.matieresPills}>
+              <div className="matiere-pill" style={{ ...styles.matierePill, background: !filtre.matiere ? '#534AB7' : '#f3f4f6', color: !filtre.matiere ? '#fff' : '#374151' }}
                 onClick={() => setFiltre({ ...filtre, matiere: '' })}>
                 Tout
               </div>
               {matieres.map(m => (
-                <div key={m} style={{
+                <div key={m} className="matiere-pill" style={{
                   ...styles.matierePill,
                   background: filtre.matiere === m ? (matiereColors[m] || '#534AB7') : '#f3f4f6',
                   color: filtre.matiere === m ? '#fff' : '#374151',
@@ -163,7 +251,7 @@ function Cours() {
                       <div>
                         <div style={styles.coursTitre}>{c.titre_es}</div>
                         <div style={styles.coursFr}>{c.titre_fr}</div>
-                        <div style={styles.coursMeta}>
+                        <div className="cours-meta" style={styles.coursMeta}>
                           <span style={{ ...styles.coursMetaTag, background: (matiereColors[c.matiere] || '#534AB7') + '18', color: matiereColors[c.matiere] || '#534AB7' }}>{c.matiere}</span>
                           <span style={styles.coursMetaText}>{c.annee}e année</span>
                           <span style={styles.coursMetaText}>{c.duree_minutes} min</span>
@@ -171,7 +259,7 @@ function Cours() {
                         </div>
                       </div>
                     </div>
-                    <div style={styles.coursRight}>
+                    <div className="cours-right" style={styles.coursRight}>
                       <button className="fav-btn" style={styles.favBtn}
                         onClick={(e) => handleFavori(e, c.id)}>☆</button>
                       <button style={styles.quizBtn}
@@ -186,6 +274,18 @@ function Cours() {
             )}
           </div>
         </main>
+      </div>
+
+      {/* ── Bottom nav mobile ── */}
+      <div className="bottom-nav">
+        {navItems.map(item => (
+          <div key={item.label}
+            className={`bottom-nav-item ${item.label === 'Cours' ? 'actif' : ''}`}
+            onClick={() => item.label === 'Cours' ? null : navigate(item.path)}>
+            <span className="bottom-nav-icon">{item.icon}</span>
+            <span className="bottom-nav-label">{item.label}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -204,10 +304,11 @@ const styles = {
   navIcon:        { fontSize: 16 },
   navItemActif:   { background: 'rgba(255,255,255,0.12)', color: '#fff' },
   sidebarBottom:  { borderTop: '0.5px solid rgba(255,255,255,0.1)', paddingTop: '1rem' },
-  userCard:       { display: 'flex', alignItems: 'center', gap: 10 },
-  userAvatar:     { width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#534AB7,#F97316)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 15 },
+  userCard:       { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 },
+  userAvatar:     { width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#534AB7,#F97316)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 15, flexShrink: 0 },
   userName:       { fontSize: 13, fontWeight: 600, color: '#fff' },
   userAnnee:      { fontSize: 11, color: 'rgba(255,255,255,0.5)' },
+  logoutBtn:      { width: '100%', padding: '8px', background: 'rgba(255,255,255,0.08)', border: '0.5px solid rgba(255,255,255,0.15)', borderRadius: 8, color: 'rgba(255,255,255,0.6)', fontSize: 12, cursor: 'pointer', fontWeight: 500 },
   main:           { flex: 1, overflow: 'auto' },
   heroHeader:     { position: 'relative', overflow: 'hidden', padding: '2rem' },
   heroBg:         { position: 'absolute', inset: 0, background: 'linear-gradient(135deg,#534AB7,#7C3AED,#F97316)', backgroundSize: '200% 200%', animation: 'gradShift 8s ease infinite', opacity: 0.92 },

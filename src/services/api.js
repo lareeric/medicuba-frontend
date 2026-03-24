@@ -30,5 +30,12 @@ export const getPlanning       = ()       => api.get('/planning');
 export const genererPlanning   = (data)   => api.post('/planning/generer', data);
 export const marquerEffectue   = (id)     => api.patch(`/planning/${id}/effectue`);
 export const annulerEffectue   = (id)     => api.patch(`/planning/${id}/annuler`);
+export const getAdminStats     = ()       => api.get('/admin/stats');
+export const getAdminUtilisateurs = ()    => api.get('/admin/utilisateurs');
+export const supprimerUtilisateur = (id)  => api.delete(`/admin/utilisateurs/${id}`);
+export const getAdminVersets   = ()       => api.get('/admin/versets');
+export const ajouterAdminVerset = (data)  => api.post('/admin/versets', data);
+export const modifierAdminVerset = (id,data) => api.put(`/admin/versets/${id}`, data);
+export const supprimerAdminVerset = (id)  => api.delete(`/admin/versets/${id}`);
 
 export default api;

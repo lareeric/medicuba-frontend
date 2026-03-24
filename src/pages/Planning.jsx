@@ -10,6 +10,7 @@ function Planning() {
   const [generation, setGeneration] = useState(false);
   const [jours, setJours]           = useState(7);
   const navigate                    = useNavigate();
+  const isAdmin = utilisateur?.is_admin === true;
 
   useEffect(() => { charger(); }, []);
 
@@ -76,7 +77,7 @@ function Planning() {
     return dateStr === today;
   };
 
-  const totalTaches     = planning.length;
+  const totalTaches      = planning.length;
   const tachesEffectuees = planning.filter(p => p.effectue).length;
   const progression      = totalTaches > 0 ? Math.round((tachesEffectuees / totalTaches) * 100) : 0;
 
@@ -87,6 +88,15 @@ function Planning() {
     'Histologie':  '#7C3AED',
     'Sémiologie':  '#DC2626',
   };
+
+  const navItems = [
+    { label: 'Accueil',   icon: '🏠', path: '/' },
+    { label: 'Cours',     icon: '📚', path: '/cours' },
+    { label: 'Quiz',      icon: '🧠', path: '/quiz' },
+    { label: 'Glossaire', icon: '📖', path: '/glossaire' },
+    { label: 'Notes',     icon: '✏️', path: '/notes' },
+    { label: 'Planning',  icon: '📅', path: '/planning' },
+  ];
 
   return (
     <div style={styles.page}>
@@ -99,25 +109,93 @@ function Planning() {
         .gen-btn { transition: all 0.2s ease !important; }
         .tache-card:hover { border-color: #534AB7 !important; }
         .tache-card { transition: all 0.15s ease !important; }
+
+        /* ══════════════════════════════════
+           RESPONSIVE MOBILE
+        ══════════════════════════════════ */
+        @media (max-width: 768px) {
+          .sidebar-desktop { display: none !important; }
+          .main-content    { margin-left: 0 !important; }
+          .page-layout     { padding-bottom: 70px !important; }
+
+          .hero-header   { padding: 1.25rem 1rem !important; }
+          .hero-title    { font-size: 20px !important; }
+          .hero-content-row { flex-direction: column !important; gap: 10px !important; align-items: flex-start !important; }
+          .hero-actions  { width: 100% !important; flex-wrap: wrap !important; }
+          .hero-select   { flex: 1 !important; min-width: 0 !important; }
+          .gen-btn-hero  { flex: 1 !important; text-align: center !important; }
+
+          .content-pad   { padding: 1rem !important; }
+
+          .stats-row     { grid-template-columns: repeat(3,1fr) !important; }
+          .stat-prog     { grid-column: 1 / -1 !important; }
+
+          .tache-card    { flex-wrap: wrap !important; gap: 8px !important; padding: 10px 12px !important; }
+          .tache-actions { width: 100% !important; justify-content: flex-end !important; }
+          .tache-heure   { min-width: auto !important; }
+
+          .bottom-nav    { display: flex !important; }
+        }
+
+        .bottom-nav {
+          display: none;
+          position: fixed;
+          bottom: 0; left: 0; right: 0;
+          background: linear-gradient(180deg,#1a1a2e,#2d1b69);
+          height: 64px; z-index: 200;
+          align-items: center; justify-content: space-around;
+          padding: 0 4px;
+          border-top: 0.5px solid rgba(255,255,255,0.1);
+        }
+        .bottom-nav-item {
+          display: flex; flex-direction: column; align-items: center;
+          justify-content: center; gap: 2px; padding: 6px 10px;
+          border-radius: 10px; cursor: pointer; flex: 1;
+          transition: background 0.15s ease;
+        }
+        .bottom-nav-item:hover { background: rgba(255,255,255,0.1); }
+        .bottom-nav-item.actif { background: rgba(255,255,255,0.12); }
+        .bottom-nav-icon  { font-size: 18px; line-height: 1; }
+        .bottom-nav-label { font-size: 9px; color: rgba(255,255,255,0.6); font-weight: 500; }
+        .bottom-nav-item.actif .bottom-nav-label { color: #fff; }
+
+        .mobile-header {
+          display: none;
+          align-items: center; justify-content: space-between;
+          padding: 0 1rem; height: 56px;
+          background: linear-gradient(180deg,#1a1a2e,#2d1b69);
+          position: sticky; top: 0; z-index: 100;
+        }
+        @media (max-width: 768px) {
+          .mobile-header { display: flex !important; }
+        }
       `}</style>
 
-      <div style={styles.layout}>
-        {/* Sidebar */}
-        <aside style={styles.sidebar}>
+      {/* ── Header mobile ── */}
+      <div className="mobile-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={styles.logoIcon}>M</div>
+          <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>MediCuba ES</span>
+        </div>
+        <div style={styles.userAvatar}>{utilisateur?.prenom?.[0]}</div>
+      </div>
+
+      <div className="page-layout" style={styles.layout}>
+
+        {/* ── Sidebar desktop ── */}
+        <aside className="sidebar-desktop" style={styles.sidebar}>
           <div style={styles.sidebarTop}>
             <div style={styles.logo}>
               <div style={styles.logoIcon}>M</div>
               <span style={styles.logoText}>MediCuba ES</span>
             </div>
             <nav style={styles.nav}>
-              {['Accueil', 'Cours', 'Quiz', 'Glossaire', 'Notes', 'Planning'].map(item => (
-                <div key={item} className="nav-item"
-                  style={{ ...styles.navItem, ...(item === 'Planning' ? styles.navItemActif : {}) }}
-                  onClick={() => handleNav(item)}>
-                  <span style={styles.navIcon}>
-                    {item === 'Accueil' ? '🏠' : item === 'Cours' ? '📚' : item === 'Quiz' ? '🧠' : item === 'Glossaire' ? '📖' : item === 'Notes' ? '✏️' : '📅'}
-                  </span>
-                  {item}
+              {navItems.map(item => (
+                <div key={item.label} className="nav-item"
+                  style={{ ...styles.navItem, ...(item.label === 'Planning' ? styles.navItemActif : {}) }}
+                  onClick={() => item.label === 'Planning' ? null : handleNav(item.label)}>
+                  <span style={styles.navIcon}>{item.icon}</span>
+                  {item.label}
                 </div>
               ))}
             </nav>
@@ -130,27 +208,33 @@ function Planning() {
                 <div style={styles.userAnnee}>{utilisateur?.annee_etudes}e année</div>
               </div>
             </div>
+            {isAdmin && (
+              <button style={{ ...styles.logoutBtn, background: 'rgba(249,115,22,0.15)', color: '#F97316', marginTop: 6, border: '0.5px solid rgba(249,115,22,0.3)' }}
+                onClick={() => navigate('/admin')}>Panel Admin</button>
+            )}
           </div>
         </aside>
 
-        <main style={styles.main}>
+        {/* ── Main ── */}
+        <main className="main-content" style={styles.main}>
+
           {/* Hero */}
-          <div style={styles.heroHeader}>
+          <div className="hero-header" style={styles.heroHeader}>
             <div style={styles.heroBg} />
-            <div style={styles.heroContent}>
+            <div className="hero-content-row" style={styles.heroContent}>
               <div>
-                <h1 style={styles.heroTitle}>📅 Planning intelligent</h1>
+                <h1 className="hero-title" style={styles.heroTitle}>📅 Planning intelligent</h1>
                 <p style={styles.heroSub}>Programme de révision généré automatiquement</p>
               </div>
-              <div style={styles.heroActions}>
-                <select style={styles.heroSelect} value={jours}
+              <div className="hero-actions" style={styles.heroActions}>
+                <select className="hero-select" style={styles.heroSelect} value={jours}
                   onChange={e => setJours(Number(e.target.value))}>
                   <option value={3}>3 jours</option>
                   <option value={7}>7 jours</option>
                   <option value={14}>14 jours</option>
                   <option value={30}>30 jours</option>
                 </select>
-                <button className="gen-btn" style={styles.genBtn}
+                <button className="gen-btn gen-btn-hero" style={styles.genBtn}
                   onClick={handleGenerer} disabled={generation}>
                   {generation ? '⏳ Génération...' : '✨ Générer le planning'}
                 </button>
@@ -158,10 +242,11 @@ function Planning() {
             </div>
           </div>
 
-          <div style={styles.content}>
+          <div className="content-pad" style={styles.content}>
+
             {/* Stats progression */}
             {totalTaches > 0 && (
-              <div style={styles.statsRow}>
+              <div className="stats-row" style={styles.statsRow}>
                 <div style={styles.statCard}>
                   <div style={styles.statNum}>{totalTaches}</div>
                   <div style={styles.statLabel}>Tâches totales</div>
@@ -174,7 +259,7 @@ function Planning() {
                   <div style={{ ...styles.statNum, color: '#F97316' }}>{totalTaches - tachesEffectuees}</div>
                   <div style={styles.statLabel}>Restantes</div>
                 </div>
-                <div style={{ ...styles.statCard, flex: 2 }}>
+                <div className="stat-prog" style={{ ...styles.statCard, flex: 2 }}>
                   <div style={styles.progInfo}>
                     <span style={styles.progLabel}>Progression globale</span>
                     <span style={{ ...styles.progLabel, color: '#534AB7' }}>{progression}%</span>
@@ -209,11 +294,9 @@ function Planning() {
                         <span style={styles.jourTitre}>{formatDate(date)}</span>
                         {isAujourdhui(date) && <span style={styles.todayBadge}>Aujourd'hui</span>}
                       </div>
-                      <div style={styles.jourStats}>
-                        <span style={styles.jourProgTxt}>
-                          {taches.filter(t => t.effectue).length}/{taches.length} fait
-                        </span>
-                      </div>
+                      <span style={styles.jourProgTxt}>
+                        {taches.filter(t => t.effectue).length}/{taches.length} fait
+                      </span>
                     </div>
 
                     <div style={styles.tachesList}>
@@ -221,7 +304,7 @@ function Planning() {
                         <div key={t.id} className="tache-card"
                           style={{ ...styles.tacheCard, ...(t.effectue ? styles.tacheEffectuee : {}) }}>
                           <div style={{ ...styles.tacheColorBar, background: matiereColors[t.matiere] || '#534AB7' }} />
-                          <div style={styles.tacheHeure}>{t.heure_debut?.slice(0,5)}</div>
+                          <div className="tache-heure" style={styles.tacheHeure}>{t.heure_debut?.slice(0,5)}</div>
                           <div style={styles.tacheInfo}>
                             <div style={styles.tacheTitre}>{t.titre_es}</div>
                             <div style={styles.tacheMeta}>
@@ -233,7 +316,7 @@ function Planning() {
                               <span style={styles.tacheDuree}>{t.duree_minutes} min</span>
                             </div>
                           </div>
-                          <div style={styles.tacheActions}>
+                          <div className="tache-actions" style={styles.tacheActions}>
                             {!t.effectue ? (
                               <button style={styles.faitBtn} onClick={() => handleEffectue(t.id)}>
                                 ✓ Fait
@@ -258,6 +341,18 @@ function Planning() {
           </div>
         </main>
       </div>
+
+      {/* ── Bottom nav mobile ── */}
+      <div className="bottom-nav">
+        {navItems.map(item => (
+          <div key={item.label}
+            className={`bottom-nav-item ${item.label === 'Planning' ? 'actif' : ''}`}
+            onClick={() => item.label === 'Planning' ? null : navigate(item.path)}>
+            <span className="bottom-nav-icon">{item.icon}</span>
+            <span className="bottom-nav-label">{item.label}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -275,10 +370,11 @@ const styles = {
   navIcon:        { fontSize: 16 },
   navItemActif:   { background: 'rgba(255,255,255,0.12)', color: '#fff' },
   sidebarBottom:  { borderTop: '0.5px solid rgba(255,255,255,0.1)', paddingTop: '1rem' },
-  userCard:       { display: 'flex', alignItems: 'center', gap: 10 },
-  userAvatar:     { width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#534AB7,#F97316)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 15 },
+  userCard:       { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 },
+  userAvatar:     { width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#534AB7,#F97316)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 15, flexShrink: 0 },
   userName:       { fontSize: 13, fontWeight: 600, color: '#fff' },
   userAnnee:      { fontSize: 11, color: 'rgba(255,255,255,0.5)' },
+  logoutBtn:      { width: '100%', padding: '8px', background: 'rgba(255,255,255,0.08)', border: '0.5px solid rgba(255,255,255,0.15)', borderRadius: 8, color: 'rgba(255,255,255,0.6)', fontSize: 12, cursor: 'pointer', fontWeight: 500 },
   main:           { flex: 1, overflow: 'auto' },
   heroHeader:     { position: 'relative', overflow: 'hidden', padding: '2rem' },
   heroBg:         { position: 'absolute', inset: 0, background: 'linear-gradient(135deg,#1D9E75,#534AB7,#7C3AED)', backgroundSize: '200% 200%', animation: 'gradShift 8s ease infinite', opacity: 0.92 },
@@ -286,7 +382,7 @@ const styles = {
   heroTitle:      { fontSize: 24, fontWeight: 800, color: '#fff', margin: '0 0 4px' },
   heroSub:        { fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: 0 },
   heroActions:    { display: 'flex', gap: 10, alignItems: 'center' },
-  heroSelect:     { padding: '10px 14px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.15)', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', backdropFilter: 'blur(4px)' },
+  heroSelect:     { padding: '10px 14px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.15)', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer' },
   genBtn:         { padding: '10px 20px', background: '#fff', border: 'none', borderRadius: 10, color: '#534AB7', fontSize: 13, fontWeight: 700, cursor: 'pointer' },
   content:        { padding: '1.5rem 2rem' },
   statsRow:       { display: 'grid', gridTemplateColumns: 'repeat(3,1fr) 2fr', gap: 12, marginBottom: '1.5rem' },
@@ -310,7 +406,6 @@ const styles = {
   jourTitreWrap:  { display: 'flex', alignItems: 'center', gap: 10 },
   jourTitre:      { fontSize: 14, fontWeight: 700, color: '#1a1a2e', textTransform: 'capitalize' },
   todayBadge:     { fontSize: 11, background: 'linear-gradient(135deg,#534AB7,#7C3AED)', color: '#fff', borderRadius: 20, padding: '3px 12px', fontWeight: 600 },
-  jourStats:      { },
   jourProgTxt:    { fontSize: 12, color: '#6b7280', fontWeight: 500 },
   tachesList:     { display: 'flex', flexDirection: 'column' },
   tacheCard:      { display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', borderBottom: '0.5px solid #f9fafb' },

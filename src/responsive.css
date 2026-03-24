@@ -1,0 +1,210 @@
+/* =============================================
+   MediCuba ES — Responsive Mobile (360px+)
+   Ajoute dans src/responsive.css
+   puis importe dans src/main.jsx :
+   import './responsive.css';
+   ============================================= */
+
+/* ─── NAVBAR LANDING ─── */
+@media (max-width: 768px) {
+  /* Cache le bouton "Commencer gratuitement" dans la navbar */
+  nav [style*="btnPrimary"] {
+    display: none !important;
+  }
+}
+
+/* ─── LANDING — HERO ─── */
+@media (max-width: 768px) {
+  /* Hero en colonne au lieu de 2 colonnes */
+  [style*="gridTemplateColumns: '1fr 1fr'"] {
+    grid-template-columns: 1fr !important;
+    padding: 2rem 1rem !important;
+    gap: 2rem !important;
+  }
+
+  /* Titre plus petit */
+  [style*="fontSize: 46"] {
+    font-size: 28px !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Cache les cartes flottantes sur mobile */
+  [style*="heroCards"] {
+    display: none !important;
+  }
+}
+
+/* ─── CONNEXION / INSCRIPTION ─── */
+@media (max-width: 768px) {
+  /* Cache le panneau gauche violet */
+  [style*="leftPanel"] {
+    display: none !important;
+  }
+
+  /* Le formulaire prend toute la largeur */
+  [style*="rightPanel"] {
+    flex: 1 !important;
+    padding: 1.5rem 1rem !important;
+    background: #F8F7FF !important;
+  }
+
+  /* Carte formulaire pleine largeur */
+  [style*="formCard"] {
+    max-width: 100% !important;
+    border-radius: 16px !important;
+    padding: 1.5rem !important;
+  }
+}
+
+/* ─── DASHBOARD AVEC SIDEBAR ─── */
+@media (max-width: 768px) {
+  /* Layout en colonne */
+  [style*="display: 'flex'"][style*="minHeight: '100vh'"] {
+    flex-direction: column !important;
+  }
+
+  /* Sidebar devient une barre de navigation en bas */
+  [style*="width: 220"][style*="background: 'linear-gradient(180deg,#1a1a2e"] {
+    width: 100% !important;
+    height: auto !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    top: auto !important;
+    left: 0 !important;
+    right: 0 !important;
+    flex-direction: row !important;
+    padding: 0.5rem 0.5rem !important;
+    z-index: 100 !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+  }
+
+  /* Cache le logo et l'user dans la sidebar mobile */
+  [style*="sidebarTop"] .logo,
+  [style*="sidebarTop"] [style*="logoText"],
+  [style*="sidebarBottom"] {
+    display: none !important;
+  }
+
+  /* Navigation horizontale */
+  [style*="flexDirection: 'column'"][style*="gap: 4"] {
+    flex-direction: row !important;
+    gap: 2px !important;
+    justify-content: space-around !important;
+    width: 100% !important;
+  }
+
+  /* Items de nav compacts */
+  [style*="navItem"] {
+    flex-direction: column !important;
+    padding: 6px 4px !important;
+    font-size: 10px !important;
+    gap: 2px !important;
+    align-items: center !important;
+    min-width: 48px !important;
+  }
+
+  /* Contenu principal avec padding en bas pour la navbar */
+  [style*="flex: 1"][style*="overflow: 'auto'"] {
+    padding-bottom: 70px !important;
+  }
+
+  /* Grilles en 2 colonnes max sur mobile */
+  [style*="gridTemplateColumns: 'repeat(4"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  [style*="gridTemplateColumns: 'repeat(3"] {
+    grid-template-columns: repeat(1, 1fr) !important;
+  }
+
+  /* Stats grid en 2 colonnes */
+  [style*="gridTemplateColumns: 'repeat(4,1fr)'"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Hero header padding réduit */
+  [style*="heroHeader"] {
+    padding: 1.5rem 1rem !important;
+  }
+
+  /* Content padding réduit */
+  [style*="padding: '1.5rem 2rem'"] {
+    padding: 1rem !important;
+  }
+}
+
+/* ─── STATS SECTION ─── */
+@media (max-width: 768px) {
+  [style*="statsGrid"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+    padding: 2rem 1rem !important;
+  }
+
+  [style*="statNum"][style*="fontSize: 42"] {
+    font-size: 28px !important;
+  }
+}
+
+/* ─── MATIERES GRID ─── */
+@media (max-width: 768px) {
+  [style*="matiereGrid"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+    padding: 0 1rem !important;
+  }
+
+  [style*="section"][style*="padding: '5rem 2rem'"] {
+    padding: 3rem 1rem !important;
+  }
+}
+
+/* ─── FEATURES GRID ─── */
+@media (max-width: 768px) {
+  [style*="featGrid"] {
+    grid-template-columns: 1fr !important;
+    padding: 0 1rem !important;
+  }
+}
+
+/* ─── CTA SECTION ─── */
+@media (max-width: 768px) {
+  [style*="ctaSection"] {
+    padding: 3rem 1.5rem !important;
+  }
+
+  [style*="ctaTitle"] {
+    font-size: 24px !important;
+  }
+}
+
+/* ─── TEXTES GÉNÉRAUX ─── */
+@media (max-width: 768px) {
+  [style*="sectionTitle"][style*="fontSize: 30"] {
+    font-size: 22px !important;
+  }
+
+  [style*="heroTitle"][style*="fontSize: 24"] {
+    font-size: 18px !important;
+  }
+}
+
+/* ─── QUIZ ─── */
+@media (max-width: 768px) {
+  [style*="quizWrap"] {
+    padding: 0 !important;
+  }
+
+  [style*="questionEs"][style*="fontSize: 18"] {
+    font-size: 15px !important;
+  }
+}
+
+/* ─── SCROLLBAR cachée sur mobile ─── */
+@media (max-width: 768px) {
+  * {
+    scrollbar-width: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
+  }
+}

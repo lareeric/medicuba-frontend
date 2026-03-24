@@ -10,6 +10,7 @@ import Quiz        from './pages/Quiz';
 import Notes       from './pages/Notes';
 import Planning    from './pages/Planning';
 import LireCours   from './pages/LireCours';
+import Admin       from './pages/Admin';
 
 const RoutePivee = ({ children }) => {
   const { utilisateur, chargement } = useAuth();
@@ -43,6 +44,9 @@ function App() {
       } />
       <Route path="/planning" element={
         <RoutePivee><Planning /></RoutePivee>
+      } />
+      <Route path="/admin" element={
+        <RoutePivee><Admin /></RoutePivee>
       } />
     </Routes>
   );
